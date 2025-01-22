@@ -251,7 +251,7 @@ export default function Lab1() {
                     to get dummy text<br />
 
                     <h4>GitHub Repository</h4>
-                    <a href="https://github.com/misha-tabatabai/kambaz-react-web-app-cs4550-sp25" id="wd-lipsum"> wd-github </a><br />
+                    <a href="https://github.com/misha-tabatabai/kambaz-react-web-app-cs4550-sp25" id="wd-github"> Misha Tabatabai Github </a><br />
                 </form>
             </div>
         </div>
