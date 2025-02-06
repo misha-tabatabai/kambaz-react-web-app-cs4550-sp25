@@ -1,6 +1,7 @@
-import { Row, Col, FormControl, FormGroup, FormLabel, InputGroup, FormSelect } from "react-bootstrap";
+import { Row, Col, FormControl, FormGroup, InputGroup, FormSelect } from "react-bootstrap";
 import { Link } from "react-router-dom";
 export default function Profile() {
+
   return (
     <div id="wd-profile-screen">
       <h1>Profile</h1>
