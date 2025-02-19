@@ -1,94 +1,60 @@
 import "./index.css";
-
-import { ListGroup } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
-import LessonControlButtons from "../Modules/LessonControlButtons";
+import { SlNote } from "react-icons/sl";
 import AssignmentsControls from "./AssignmentsControls";
 import AssignmentControlButtons from "./AssignmentControlButtons";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { SlNote } from "react-icons/sl";
+import { useParams } from "react-router";
+import * as db from "../../Database";
+import LessonControlButtons from "../Modules/LessonControlButtons";
 
 export default function Assignments() {
-    return (
-        <div id="wd-assignments">
+  const { cid } = useParams();
+  console.log("Assignments: cid =", cid);
 
-            <AssignmentsControls /><br /><br /><br /><br />
-            <ListGroup className="rounded-0" id="wd-modules">
-                <ListGroup.Item className="wd-module p-0 mb-5 fs-5 border-gray">
-                    <div className="wd-title p-3 ps-2 bg-secondary">
-                        <BsGripVertical className="me-2 fs-3" />
-                        <IoMdArrowDropdown />
-                        ASSIGNMENTS <AssignmentControlButtons />
-                    </div>
-                    <ListGroup className="wd-lessons rounded-0">
-                        <ul className="wd-lessons list-group rounded-0">
-                            <li className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
-                                <BsGripVertical className="me-2 fs-3" />
-                                <SlNote size="25" color="green" />
-                                <div className="position-absolute top-50 start-50 translate-middle w-75">
-                                    <a className="wd-assignment-link text-black link-underline link-underline-opacity-0" href="#/Kambaz/Courses/1234/Assignments/123"> <b>A1</b> </a>
-                                    <p><text className="text-danger">Multiple Modules</text> | <b>Not Available until</b> May 6 at 12:00am | <br /> <b>Due</b> May 13 at 11:59pm | 100 pts</p>
-                                </div>
-                                <div className="ms-auto d-flex align-items-center">
-                                    <LessonControlButtons /> <br /><br /><br />
-                                </div>
-                            </li>
-                            <li className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
-                                <BsGripVertical className="me-2 fs-3" />
-                                <SlNote size="25" color="green" />
-                                <div className="position-absolute top-50 start-50 translate-middle w-75">
-                                    <a className="wd-assignment-link text-black link-underline link-underline-opacity-0" href="#/Kambaz/Courses/1234/Assignments/123"> <b>A2</b> </a>
-                                    <p><text className="text-danger">Multiple Modules</text> | <b>Not Available until</b> May 13 at 12:00am | <br /> <b>Due</b> May 20 at 11:59pm | 100 pts</p>
-                                </div>
-                                <div className="ms-auto d-flex align-items-center">
-                                    <LessonControlButtons /> <br /><br /><br />
-                                </div>                            </li>
-                            <li className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
-                                <BsGripVertical className="me-2 fs-3" />
-                                <SlNote size="25" color="green" />
-                                <div className="position-absolute top-50 start-50 translate-middle w-75">
-                                    <a className="wd-assignment-link text-black link-underline link-underline-opacity-0" href="#/Kambaz/Courses/1234/Assignments/123"> <b>A3</b> </a>
-                                    <p><text className="text-danger">Multiple Modules</text> | <b>Not Available until</b> May 20 at 12:00am | <br /> <b>Due</b> May 27 at 11:59pm | 100 pts</p>
-                                </div>
-                                <div className="ms-auto d-flex align-items-center">
-                                    <LessonControlButtons /> <br /><br /><br />
-                                </div>                            </li>
-                        </ul>
-                    </ListGroup>
-                </ListGroup.Item>
-            </ListGroup>
-        </div>
-    );
+  const assignments = db.assignments;
+  console.log("Assignments: all assignments =", assignments);
+
+  const filteredAssignments =
+    assignments && assignments.filter((assignment: any) => assignment.course === cid);
+  console.log("Assignments: filteredAssignments =", filteredAssignments);
+
+  return (
+    <div id="wd-assignments">
+      <AssignmentsControls /><br /><br /><br /><br />
+      <ul className="rounded-0" id="wd-modules">
+      <div className="wd-title p-3 ps-2 bg-secondary">
+  <BsGripVertical className="me-2 fs-3" />
+  <IoMdArrowDropdown />
+  <span style={{ fontSize: "1.5rem" }}>ASSIGNMENTS</span> <AssignmentControlButtons />
+</div>
+          <ul className="wd-lessons list-group rounded-0">
+            {filteredAssignments && filteredAssignments.length > 0 ? (
+              filteredAssignments.map((assignment: any) => (
+                <li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
+                  <BsGripVertical className="me-2 fs-3" />
+                  <SlNote size="25" color="green" />
+                  <div className="position-absolute top-50 start-50 translate-middle w-75">
+                    <a
+                      className="wd-assignment-link text-black link-underline link-underline-opacity-0"
+                      href={`#/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
+                    >
+                      <h4>{assignment.title}</h4>
+                      <p><text className="text-danger">Multiple Modules</text> | <b>Not Available until</b> May 6 at 12:00am | <br /> <b>Due</b> May 13 at 11:59pm | 100 pts</p>
+                    </a>
+                  </div>
+                  <div className="ms-auto d-flex align-items-center">
+                    <LessonControlButtons /> <br /><br /><br />
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li className="wd-lesson list-group-item p-3 ps-1">
+                No assignments available for this course.
+              </li>
+            )}
+          </ul>
+      </ul>
+    </div>
+  );
 }
-
-
-
-
-// export default function Assignments() {
-//     return (
-//         <div id="wd-assignments">
-//             <h3 id="wd-assignments-title">
-//                 ASSIGNMENTS 40% of Total <button>+</button> </h3>
-//             <ul id="wd-assignment-list">
-//                 <li className="wd-assignment-list-item">
-//                     <a href="#/Kambaz/Courses/1234/Assignments/123"
-//                         className="wd-assignment-link" >
-//                         A1 - ENV + HTML
-//                     </a> </li>
-//                 <p className="wd-assignment-details">Multiple Modules | <b>Not available until</b> May 6 at 12:00am |  <b>Due</b> May 13 at 11:59pm | 100 pts</p>
-//                 <li className="wd-assignment-list-item">
-//                     <a href="#/Kambaz/Courses/1234/Assignments/123"
-//                         className="wd-assignment-link" >
-//                         A2 - CSS + BOOTSTRAP
-//                     </a> </li>
-//                 <p className="wd-assignment-details">Multiple Modules | <b>Not available until</b> May 13 at 12:00am | <b>Due</b> May 20 at 11:59pm | 100 pts</p>
-//                 <li className="wd-assignment-list-item">
-//                     <a href="#/Kambaz/Courses/1234/Assignments/123"
-//                         className="wd-assignment-link" >
-//                         A3 - JAVASCRIPT + REACT
-//                     </a> </li>
-//                 <p className="wd-assignment-details">Multiple Modules | <b>Not available until</b> May 20 at 12:00am | <b>Due</b> May 27 at 11:59pm | 100 pts</p>
-//             </ul>
-//         </div>
-//     );
-// }

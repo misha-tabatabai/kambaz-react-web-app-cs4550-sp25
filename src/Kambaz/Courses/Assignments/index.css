@@ -19,16 +19,23 @@
 }
 
 .wd-assignemnt-box {
-    width: 610px;
-    min-width: 610px;
-    max-width: 610px;
+    width: 400px;
+    min-width: 400px;
+    max-width: 400px;
     padding: 8px;
 }
 
 .wd-assignemnt-box-2 {
-    width: 465px;
-    min-width: 465px;
-    max-width: 465px;
+    width: 480px;
+    min-width: 480px;
+    max-width: 480px;
     height: 55px;
     text-align: left;
+}
+
+.wd-assignemnt-box-3 {
+    width: 480px;
+    min-width: 480px;
+    max-width: 480px;
+    padding: 8px;
 }
