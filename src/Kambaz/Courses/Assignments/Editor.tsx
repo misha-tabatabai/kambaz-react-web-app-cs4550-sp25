@@ -1,16 +1,51 @@
 import { Col, FormControl, FormGroup } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import * as db from "../../Database";
+import { useDispatch } from "react-redux";
+import { addAssignment, updateAssignment } from "./reducer";
+import EditorControlButtons from "./EditorControlButtons";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const assignment = db.assignments.find(
-    (a: any) => a._id === aid && a.course === cid);
+  const handleSave = () => {
+    if (aid == 'new') {
+      dispatch(addAssignment(assignment));
+    } else {
+      dispatch(updateAssignment(assignment));
+    }
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
+  
+  const handleCancel = () => {
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
 
-  if (!assignment) {
-    return <div>Assignment not found.</div>;
-}
+  const defaultAssignment = {
+    _id: "",
+    title: "",
+    description: "Add description here",
+    points: "100",
+    dueDate: "",
+    availableFrom: "",
+    availableUntil: "",
+    course: cid,
+    group: "",
+    submissionType: "ONLINE",
+    onlineEntry: false,
+    websiteURL: false,
+    mediaRecordings: false,
+    studentAnnotation: false,
+    fileUpload: false,
+    gradeDisplay: "Percentage"
+  };
+
+  const assignment =
+    aid === "new"
+      ? defaultAssignment
+      : db.assignments.find((a: any) => a._id === aid && a.course === cid) || defaultAssignment;
 
   return (
     <div id="wd-assignments-editor">
@@ -24,27 +59,14 @@ export default function AssignmentEditor() {
             style={{ width: "625px" }}
           />
         </Col>
-      </FormGroup> 
+      </FormGroup>
 
       <FormGroup className="mb-3">
         <Col sm={6}>
           <FormControl
             as="textarea"
             rows={12}
-            defaultValue={
-              //assignment.description ||
-              `The assignment is [available online]
-
-Submit a link to the landing page of your Web application running on Netlify.
-
-The landing page should include the following:
-
-- Your full name and section
-- Links to each of the lab assignments
-- Link to the Kambaz application
-- Links to all relevant source code repositories
-
-The Kambaz application should include a link to navigate back to the landing page.`
+            defaultValue={defaultAssignment.description
             }
             style={{ width: "625px" }}
           />
@@ -62,8 +84,8 @@ The Kambaz application should include a link to navigate back to the landing pag
                 <Col sm={12}>
                   <FormControl
                     placeholder="Points"
-                    defaultValue= "100"
-                    //defaultValue={assignment.points || "100"}
+                    defaultValue="100"
+                  //defaultValue={assignment.points || "100"}
                   />
                 </Col>
               </FormGroup>
@@ -80,7 +102,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                   id="wd-group"
                   className="form-select p-3 border rounded wd-assignemnt-box-2"
                   defaultValue="ASSIGNMENTS"
-                  //defaultValue={assignment.group || "ASSIGNMENTS"}
+                //defaultValue={assignment.group || "ASSIGNMENTS"}
                 >
                   <option value="ASSIGNMENTS">ASSIGNMENTS</option>
                   <option value="OPTION1">Option1</option>
@@ -101,7 +123,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                   id="wd-group"
                   className="form-select p-3 border rounded wd-assignemnt-box-2"
                   defaultValue="Percentage"
-                  //defaultValue={assignment.gradeDisplay || "Percentage"}
+                //defaultValue={assignment.gradeDisplay || "Percentage"}
                 >
                   <option value="Percentage">Percentage</option>
                   <option value="OPTION1">Option1</option>
@@ -124,7 +146,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                       id="wd-submission-type"
                       className="form-select p-2 border-0 w-100"
                       defaultValue="ONLINE"
-                      //defaultValue={assignment.submissionType || "ONLINE"}
+                    //defaultValue={assignment.submissionType || "ONLINE"}
                     >
                       <option value="ONLINE">Online</option>
                       <option value="OPTION1">Option1</option>
@@ -140,7 +162,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                         className="form-check-input"
                         type="checkbox"
                         id="wd-text-entry"
-                        //defaultChecked={assignment.onlineEntry || false}
+                      //defaultChecked={assignment.onlineEntry || false}
                       />
                       <label className="form-check-label" htmlFor="wd-text-entry">
                         Text Entry
@@ -151,7 +173,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                         className="form-check-input"
                         type="checkbox"
                         id="wd-website-url"
-                        //defaultChecked={assignment.websiteURL || false}
+                      //defaultChecked={assignment.websiteURL || false}
                       />
                       <label className="form-check-label" htmlFor="wd-website-url">
                         Website URL
@@ -162,7 +184,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                         className="form-check-input"
                         type="checkbox"
                         id="wd-media-recordings"
-                        //defaultChecked={assignment.mediaRecordings || false}
+                      //defaultChecked={assignment.mediaRecordings || false}
                       />
                       <label className="form-check-label" htmlFor="wd-media-recordings">
                         Media Recordings
@@ -173,7 +195,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                         className="form-check-input"
                         type="checkbox"
                         id="wd-student-annotation"
-                        //defaultChecked={assignment.studentAnnotation || false}
+                      //defaultChecked={assignment.studentAnnotation || false}
                       />
                       <label className="form-check-label" htmlFor="wd-student-annotation">
                         Student Annotation
@@ -184,7 +206,7 @@ The Kambaz application should include a link to navigate back to the landing pag
                         className="form-check-input"
                         type="checkbox"
                         id="wd-file-upload"
-                        //defaultChecked={assignment.fileUpload || false}
+                      //defaultChecked={assignment.fileUpload || false}
                       />
                       <label className="form-check-label" htmlFor="wd-file-upload">
                         File Uploads
@@ -215,8 +237,8 @@ The Kambaz application should include a link to navigate back to the landing pag
 
                   <label htmlFor="wd-due-date" className="mb-1"><b>Due</b></label>
                   <div className="input-group p-2 border rounded mb-3">
-                    <input type="date" className="form-control border-0" id="wd-due-date" 
-                    defaultValue="2024-05-13" 
+                    <input type="date" className="form-control border-0" id="wd-due-date"
+                      defaultValue="2024-05-13"
                     //defaultValue={assignment.dueDate || "2024-05-13"}
                     />
                   </div>
@@ -225,8 +247,8 @@ The Kambaz application should include a link to navigate back to the landing pag
                     <div className="w-50">
                       <label htmlFor="wd-available-from" className="mb-1"><b>Available From</b></label>
                       <div className="input-group p-2 border rounded">
-                        <input type="date" className="form-control border-0" id="wd-available-from" 
-                        defaultValue= "2024-05-06"
+                        <input type="date" className="form-control border-0" id="wd-available-from"
+                          defaultValue="2024-05-06"
                         //defaultValue={assignment.availableDate || "2024-05-06"}
                         />
                       </div>
@@ -234,8 +256,8 @@ The Kambaz application should include a link to navigate back to the landing pag
                     <div className="w-50">
                       <label htmlFor="wd-available-until" className="mb-1"><b>Until</b></label>
                       <div className="input-group p-2 border rounded">
-                        <input type="date" className="form-control border-0" id="wd-available-until" 
-                        defaultValue= "2024-05-20"
+                        <input type="date" className="form-control border-0" id="wd-available-until"
+                          defaultValue="2024-05-20"
                         //defaultValue={assignment.availableUntil || "2024-05-20"} 
                         />
                       </div>
@@ -254,12 +276,7 @@ The Kambaz application should include a link to navigate back to the landing pag
 
           <tr>
             <td colSpan={2} align="right" valign="top">
-              <Link to={`/Kambaz/Courses/${assignment.course}/Assignments`} className="btn btn-secondary me-2">
-                Cancel
-              </Link>
-              <Link to={`/Kambaz/Courses/${assignment.course}/Assignments`} className="btn btn-danger">
-                Save
-              </Link>
+              <EditorControlButtons onSave={handleSave} onCancel={handleCancel} />
             </td>
           </tr>
         </tbody>

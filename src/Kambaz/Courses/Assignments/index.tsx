@@ -14,6 +14,7 @@ export default function Assignments() {
 
   const assignments = db.assignments;
   console.log("Assignments: all assignments =", assignments);
+  
 
   const filteredAssignments =
     assignments && assignments.filter((assignment: any) => assignment.course === cid);

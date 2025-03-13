@@ -3,6 +3,7 @@ import GreenCheckmark from "./GreenCheckmark";
 import { BsPlus } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
+import { useSelector } from "react-redux";
 
 export default function ModuleControlButtons(
     { moduleId, deleteModule, editModule }: {
@@ -11,14 +12,20 @@ export default function ModuleControlButtons(
         editModule: (moduleId: string) => void
     }
 ) {
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const isFaculty = currentUser?.role === "FACULTY";
     return (
         <div className="float-end">
-            <FaPencil
-                onClick={() => editModule(moduleId)}
-                className="text-primary me-3" />
-            <FaTrash
-                className="text-danger me-2 mb-1"
-                onClick={() => deleteModule(moduleId)} />
+            {isFaculty && (
+                <>
+                    <FaPencil
+                        onClick={() => editModule(moduleId)}
+                        className="text-primary me-3" />
+                    <FaTrash
+                        className="text-danger me-2 mb-1"
+                        onClick={() => deleteModule(moduleId)} />
+                </>
+            )}
             <GreenCheckmark />
             <BsPlus
                 className="fs-4 mx-2" />

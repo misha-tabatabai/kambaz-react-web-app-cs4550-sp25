@@ -13,21 +13,18 @@ export default function TodoForm() {
                     onChange={(e) =>
                         dispatch(setTodo({ ...todo, title: e.target.value }))
                     }
-                    style={{ flex: 1 }}
-                />
+                    style={{ flex: 1 }} />
                 <div style={{ display: "flex", gap: "10px", marginLeft: "10px" }}>
                     <Button
                         variant="warning"
                         onClick={() => dispatch(updateTodo(todo))}
-                        id="wd-update-todo-click"
-                    >
+                        id="wd-update-todo-click">
                         Update
                     </Button>
                     <Button
                         variant="success"
                         onClick={() => dispatch(addTodo(todo))}
-                        id="wd-add-todo-click"
-                    >
+                        id="wd-add-todo-click">
                         Add
                     </Button>
                 </div>
