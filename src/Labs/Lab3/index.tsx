@@ -29,12 +29,22 @@ import Add from "./Add";
 import Square from "./Square";
 import Highlight from "./Highlight";
 import PathParameters from "./PathParameters";
+import { useSelector } from "react-redux";
+import { ListGroup } from "react-bootstrap";
 
 export default function Lab3() {
+  const { todos } = useSelector((state: any) => state.todosReducer);
   console.log('Hello World!');
   return (
     <div id="wd-lab3">
       <h1>Lab 3</h1>
+      <ListGroup>
+        {todos.map((todo: any) => (
+          <ListGroup.Item key={todo.id}>
+            {todo.title}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
       <VariablesAndConstants />
       <VariableTypes />
       <BooleanVariables />
@@ -69,6 +79,7 @@ export default function Lab3() {
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipitratione eaque illo minus cum, saepe totam vel nihil repellat nemo explicabo excepturi consectetur. Modi omnis minus sequi maiores, provident voluptates.
       </Highlight><hr />
       <PathParameters />
+      <hr />
     </div>
   );
 }
