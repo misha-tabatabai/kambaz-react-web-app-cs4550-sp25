@@ -1,38 +1,27 @@
 import { Col, FormControl, FormGroup } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import * as db from "../../Database";
 import { useDispatch } from "react-redux";
 import { addAssignment, updateAssignment } from "./reducer";
 import EditorControlButtons from "./EditorControlButtons";
+import { useState, useEffect } from "react";
+import * as assignmentClient from "./client";
+import * as coursesClient from "../client";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSave = () => {
-    if (aid == 'new') {
-      dispatch(addAssignment(assignment));
-    } else {
-      dispatch(updateAssignment(assignment));
-    }
-    navigate(`/Kambaz/Courses/${cid}/Assignments`);
-  };
-  
-  const handleCancel = () => {
-    navigate(`/Kambaz/Courses/${cid}/Assignments`);
-  };
-
   const defaultAssignment = {
     _id: "",
     title: "",
     description: "Add description here",
     points: "100",
-    dueDate: "",
-    availableFrom: "",
-    availableUntil: "",
+    dueDate: "2024-05-13",
+    availableFrom: "2024-05-06",
+    availableUntil: "2024-05-20",
     course: cid,
-    group: "",
+    group: "ASSIGNMENTS",
     submissionType: "ONLINE",
     onlineEntry: false,
     websiteURL: false,
@@ -42,10 +31,51 @@ export default function AssignmentEditor() {
     gradeDisplay: "Percentage"
   };
 
-  const assignment =
-    aid === "new"
-      ? defaultAssignment
-      : db.assignments.find((a: any) => a._id === aid && a.course === cid) || defaultAssignment;
+  const [assignment, setAssignment] = useState(defaultAssignment);
+
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      if (aid && aid !== "new") {
+        try {
+          const assignments = await coursesClient.findAssignmentForCourse(cid as string);
+          const existingAssignment = assignments.find((a: any) => a._id === aid);
+          if (existingAssignment) {
+            setAssignment({
+              ...defaultAssignment,
+              ...existingAssignment,
+              course: cid
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch assignment:", error);
+        }
+      }
+    };
+    fetchAssignment();
+  }, [aid, cid]);
+
+  const handleSave = async () => {
+    try {
+      if (aid === 'new') {
+        const newAssignment = await coursesClient.createAssignmentForCourse(cid as string, assignment);
+        dispatch(addAssignment(newAssignment));
+      } else {
+        const updatedAssignment = await assignmentClient.updateAssignment(assignment);
+        dispatch(updateAssignment(updatedAssignment));
+      }
+      navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    } catch (error) {
+      console.error("Failed to save assignment:", error);
+    }
+  };
+  
+  const handleCancel = () => {
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
+
+  const handleChange = (field: string, value: any) => {
+    setAssignment(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div id="wd-assignments-editor">
@@ -55,7 +85,8 @@ export default function AssignmentEditor() {
         <Col sm={6}>
           <FormControl
             placeholder="Assignment Name"
-            defaultValue={assignment.title}
+            value={assignment.title}
+            onChange={(e) => handleChange('title', e.target.value)}
             style={{ width: "625px" }}
           />
         </Col>
@@ -66,8 +97,8 @@ export default function AssignmentEditor() {
           <FormControl
             as="textarea"
             rows={12}
-            defaultValue={defaultAssignment.description
-            }
+            value={assignment.description}
+            onChange={(e) => handleChange('description', e.target.value)}
             style={{ width: "625px" }}
           />
         </Col>
@@ -84,8 +115,8 @@ export default function AssignmentEditor() {
                 <Col sm={12}>
                   <FormControl
                     placeholder="Points"
-                    defaultValue="100"
-                  //defaultValue={assignment.points || "100"}
+                    value={assignment.points}
+                    onChange={(e) => handleChange('points', e.target.value)}
                   />
                 </Col>
               </FormGroup>
@@ -101,8 +132,8 @@ export default function AssignmentEditor() {
                 <select
                   id="wd-group"
                   className="form-select p-3 border rounded wd-assignemnt-box-2"
-                  defaultValue="ASSIGNMENTS"
-                //defaultValue={assignment.group || "ASSIGNMENTS"}
+                  value={assignment.group}
+                  onChange={(e) => handleChange('group', e.target.value)}
                 >
                   <option value="ASSIGNMENTS">ASSIGNMENTS</option>
                   <option value="OPTION1">Option1</option>
@@ -122,8 +153,8 @@ export default function AssignmentEditor() {
                 <select
                   id="wd-group"
                   className="form-select p-3 border rounded wd-assignemnt-box-2"
-                  defaultValue="Percentage"
-                //defaultValue={assignment.gradeDisplay || "Percentage"}
+                  value={assignment.gradeDisplay}
+                  onChange={(e) => handleChange('gradeDisplay', e.target.value)}
                 >
                   <option value="Percentage">Percentage</option>
                   <option value="OPTION1">Option1</option>
@@ -145,8 +176,8 @@ export default function AssignmentEditor() {
                     <select
                       id="wd-submission-type"
                       className="form-select p-2 border-0 w-100"
-                      defaultValue="ONLINE"
-                    //defaultValue={assignment.submissionType || "ONLINE"}
+                      value={assignment.submissionType}
+                      onChange={(e) => handleChange('submissionType', e.target.value)}
                     >
                       <option value="ONLINE">Online</option>
                       <option value="OPTION1">Option1</option>
@@ -162,7 +193,8 @@ export default function AssignmentEditor() {
                         className="form-check-input"
                         type="checkbox"
                         id="wd-text-entry"
-                      //defaultChecked={assignment.onlineEntry || false}
+                        checked={assignment.onlineEntry}
+                        onChange={(e) => handleChange('onlineEntry', e.target.checked)}
                       />
                       <label className="form-check-label" htmlFor="wd-text-entry">
                         Text Entry
@@ -173,7 +205,8 @@ export default function AssignmentEditor() {
                         className="form-check-input"
                         type="checkbox"
                         id="wd-website-url"
-                      //defaultChecked={assignment.websiteURL || false}
+                        checked={assignment.websiteURL}
+                        onChange={(e) => handleChange('websiteURL', e.target.checked)}
                       />
                       <label className="form-check-label" htmlFor="wd-website-url">
                         Website URL
@@ -184,7 +217,8 @@ export default function AssignmentEditor() {
                         className="form-check-input"
                         type="checkbox"
                         id="wd-media-recordings"
-                      //defaultChecked={assignment.mediaRecordings || false}
+                        checked={assignment.mediaRecordings}
+                        onChange={(e) => handleChange('mediaRecordings', e.target.checked)}
                       />
                       <label className="form-check-label" htmlFor="wd-media-recordings">
                         Media Recordings
@@ -195,7 +229,8 @@ export default function AssignmentEditor() {
                         className="form-check-input"
                         type="checkbox"
                         id="wd-student-annotation"
-                      //defaultChecked={assignment.studentAnnotation || false}
+                        checked={assignment.studentAnnotation}
+                        onChange={(e) => handleChange('studentAnnotation', e.target.checked)}
                       />
                       <label className="form-check-label" htmlFor="wd-student-annotation">
                         Student Annotation
@@ -206,7 +241,8 @@ export default function AssignmentEditor() {
                         className="form-check-input"
                         type="checkbox"
                         id="wd-file-upload"
-                      //defaultChecked={assignment.fileUpload || false}
+                        checked={assignment.fileUpload}
+                        onChange={(e) => handleChange('fileUpload', e.target.checked)}
                       />
                       <label className="form-check-label" htmlFor="wd-file-upload">
                         File Uploads
@@ -237,9 +273,12 @@ export default function AssignmentEditor() {
 
                   <label htmlFor="wd-due-date" className="mb-1"><b>Due</b></label>
                   <div className="input-group p-2 border rounded mb-3">
-                    <input type="date" className="form-control border-0" id="wd-due-date"
-                      defaultValue="2024-05-13"
-                    //defaultValue={assignment.dueDate || "2024-05-13"}
+                    <input 
+                      type="date" 
+                      className="form-control border-0" 
+                      id="wd-due-date"
+                      value={assignment.dueDate}
+                      onChange={(e) => handleChange('dueDate', e.target.value)}
                     />
                   </div>
 
@@ -247,18 +286,24 @@ export default function AssignmentEditor() {
                     <div className="w-50">
                       <label htmlFor="wd-available-from" className="mb-1"><b>Available From</b></label>
                       <div className="input-group p-2 border rounded">
-                        <input type="date" className="form-control border-0" id="wd-available-from"
-                          defaultValue="2024-05-06"
-                        //defaultValue={assignment.availableDate || "2024-05-06"}
+                        <input 
+                          type="date" 
+                          className="form-control border-0" 
+                          id="wd-available-from"
+                          value={assignment.availableFrom}
+                          onChange={(e) => handleChange('availableFrom', e.target.value)}
                         />
                       </div>
                     </div>
                     <div className="w-50">
                       <label htmlFor="wd-available-until" className="mb-1"><b>Until</b></label>
                       <div className="input-group p-2 border rounded">
-                        <input type="date" className="form-control border-0" id="wd-available-until"
-                          defaultValue="2024-05-20"
-                        //defaultValue={assignment.availableUntil || "2024-05-20"} 
+                        <input 
+                          type="date" 
+                          className="form-control border-0" 
+                          id="wd-available-until"
+                          value={assignment.availableUntil}
+                          onChange={(e) => handleChange('availableUntil', e.target.value)}
                         />
                       </div>
                     </div>
@@ -267,20 +312,10 @@ export default function AssignmentEditor() {
               </FormGroup>
             </td>
           </tr>
-
-          <tr>
-            <td colSpan={2}>
-              <hr />
-            </td>
-          </tr>
-
-          <tr>
-            <td colSpan={2} align="right" valign="top">
-              <EditorControlButtons onSave={handleSave} onCancel={handleCancel} />
-            </td>
-          </tr>
         </tbody>
       </table>
+
+      <EditorControlButtons onSave={handleSave} onCancel={handleCancel} />
     </div>
   );
 }

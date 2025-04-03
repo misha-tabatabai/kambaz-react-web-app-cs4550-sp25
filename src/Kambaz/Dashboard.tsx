@@ -1,28 +1,36 @@
 import { Row, Col, Card, Button, FormControl } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import * as db from "./Database";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import * as enrollmentClient from "./Enrollments/client";
+import { removeEnrolledCourse, setEnrolledCourses } from "./Enrollments/reducer";
+import * as userClient from "./Account/client";
 
 export default function Dashboard(
     { courses, course, setCourse, addNewCourse,
-        deleteCourse, updateCourse }: {
+        deleteCourse, updateCourse, updateEnrollment }: {
             courses: any[]; course: any; setCourse: (course: any) => void;
             addNewCourse: () => void; deleteCourse: (course: any) => void;
-            updateCourse: () => void;
+            updateCourse: () => void; updateEnrollment: (courseId: string, isEnrolling: boolean) => void;
         }) {
 
+    const dispatch = useDispatch();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const isFaculty = currentUser?.role === "FACULTY";
-    const { enrollments } = db;
-    const enrolledCourses = currentUser
-        ? courses.filter((course: any) =>
-            enrollments.some(
-                (enrollment: any) =>
-                    enrollment.user === currentUser._id &&
-                    enrollment.course === course._id
-            )
-        )
-        : [];
+    const isStudent = currentUser?.role === "STUDENT";
+    const navigate = useNavigate();
+
+    const handleUnenroll = async (courseId: string) => {
+        if (!currentUser) return;
+        try {
+            await enrollmentClient.unenrollUserFromCourse(currentUser._id, courseId);
+            const updatedCourses = await userClient.findMyCourses();
+            dispatch(setEnrolledCourses(updatedCourses));
+            updateEnrollment(courseId, false);
+            dispatch(removeEnrolledCourse(courseId));
+        } catch (error) {
+            console.error("Error unenrolling from course:", error);
+        }
+    };
 
     return (
         <div id="wd-dashboard">
@@ -65,17 +73,21 @@ export default function Dashboard(
             )}
 
 
-            <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2> <hr />
+            <h2 id="wd-dashboard-published">
+                Published Courses ({courses.length})
+                {isStudent && (
+                    <button
+                        className="btn btn-primary float-end"
+                        id="wd-enroll-new-courses"
+                        onClick={() => navigate("/Kambaz/Enrollments")}
+                    >
+                        Enroll in New Courses
+                    </button>
+                )}
+            </h2> <hr />
             <div id="wd-dashboard-courses">
                 <Row xs={1} md={5} className="g-4">
-                    {enrolledCourses
-                        .filter((course) =>
-                            enrollments.some(
-                                (enrollment) =>
-                                    enrollment.user === currentUser._id &&
-                                    enrollment.course === course._id
-                            ))
-
+                    {courses
                         .map((course) => (
                             <Col className="wd-dashboard-course" style={{ width: "270px" }}>
                                 <Card>
@@ -113,6 +125,18 @@ export default function Dashboard(
                                                 </>
                                             )}
 
+                                            {isStudent && (
+                                                <button
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        handleUnenroll(course._id);
+                                                    }}
+                                                    className="btn btn-danger float-end"
+                                                    id="wd-unenroll-course-click"
+                                                >
+                                                    Unenroll
+                                                </button>
+                                            )}
                                         </Card.Body>
                                     </Link>
                                 </Card>
