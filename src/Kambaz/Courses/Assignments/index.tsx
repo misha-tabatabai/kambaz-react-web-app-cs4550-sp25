@@ -6,7 +6,7 @@ import AssignmentControlButtons from "./AssignmentControlButtons";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useParams } from "react-router";
 import AssignmentControlButtons2 from "./AssignmentControlButtons2";
-import { setAssignments, addAssignment, updateAssignment, deleteAssignment } from "./reducer";
+import { setAssignments, deleteAssignment } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
 import * as assignmentClient from "./client";
 import * as coursesClient from "../client";
@@ -16,11 +16,6 @@ export default function Assignments() {
   const { cid } = useParams();
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const dispatch = useDispatch();
-
-  const saveAssignment = async (assignment: any) => {
-    await assignmentClient.updateAssignment(assignment);
-    dispatch(updateAssignment(assignment));
-  };
 
   const removeAssignment = async (assignmentId: string) => {
     try {
