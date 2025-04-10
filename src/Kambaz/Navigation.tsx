@@ -2,16 +2,21 @@ import { Link, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { IoCalendarOutline } from "react-icons/io5";
 import { LiaBookSolid, LiaCogSolid } from "react-icons/lia";
-import { FaInbox, FaRegCircleUser } from "react-icons/fa6";
+import { FaInbox, FaRegCircleUser, FaUsers } from "react-icons/fa6";
 import { ListGroup } from "react-bootstrap";
+import { useSelector } from "react-redux";
 
 export default function KambazNavigation() {
     const { pathname } = useLocation();
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const isAdmin = currentUser?.role === "ADMIN";
+
     const links = [
         { label: "Dashboard", path: "/Kambaz/Dashboard", icon: AiOutlineDashboard },
         { label: "Courses", path: "/Kambaz/Dashboard", icon: LiaBookSolid },
         { label: "Calendar", path: "/Kambaz/Calendar", icon: IoCalendarOutline },
         { label: "Inbox", path: "/Kambaz/Inbox", icon: FaInbox },
+        ...(isAdmin ? [{ label: "Users", path: "/Kambaz/Account/Users", icon: FaUsers }] : []),
         { label: "Labs", path: "/Labs", icon: LiaCogSolid },
     ];
 

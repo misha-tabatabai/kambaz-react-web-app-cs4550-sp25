@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { setCurrentUser } from "./reducer";
 import { useDispatch } from "react-redux";
-// import * as db from "../Database";
 import { FormControl, Button } from "react-bootstrap";
 import * as client from "./client";
 
@@ -12,6 +11,7 @@ export default function Signin() {
   const navigate = useNavigate();
 
   const signin = async () => {
+    console.log(credentials);
     const user = await client.signin(credentials);
     if (!user) return;
     dispatch(setCurrentUser(user));
