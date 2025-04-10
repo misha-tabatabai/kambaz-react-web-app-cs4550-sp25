@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 export default function AccountNavigation() {
   const { pathname } = useLocation();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const active = (path: string) => (pathname.includes(path) ? "active" : "");
 
   return (
     <div id="wd-account-navigation" className="wd list-group fs-5 rounded-0">
