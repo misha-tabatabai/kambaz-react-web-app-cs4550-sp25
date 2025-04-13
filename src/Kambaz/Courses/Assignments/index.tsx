@@ -37,6 +37,7 @@ export default function Assignments() {
 
   const filteredAssignments =
     assignments && assignments.filter((assignment: any) => assignment.course === cid);
+  console.log(filteredAssignments);
 
   return (
     <div id="wd-assignments">
