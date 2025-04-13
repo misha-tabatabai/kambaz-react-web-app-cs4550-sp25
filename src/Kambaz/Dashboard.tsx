@@ -1,9 +1,6 @@
 import { Row, Col, Card, Button, FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import * as enrollmentClient from "./Enrollments/client";
-import { removeEnrolledCourse, setEnrolledCourses } from "./Enrollments/reducer";
-import * as userClient from "./Account/client";
+import { useSelector} from "react-redux";
 
 export default function Dashboard(
     { courses, course, setCourse, addNewCourse,
@@ -20,22 +17,8 @@ export default function Dashboard(
 
     const { currentUser } = useSelector((state: any) => state.accountReducer);
            
-    const dispatch = useDispatch();
     const isFaculty = currentUser?.role === "FACULTY";
     const isStudent = currentUser?.role === "STUDENT";
-
-
-    const handleUnenroll = async (courseId: string) => {
-        if (!currentUser) return;
-        try {
-            await enrollmentClient.unenrollUserFromCourse(currentUser._id, courseId);
-            const updatedCourses = await userClient.findMyCourses();
-            dispatch(setEnrolledCourses(updatedCourses));
-            dispatch(removeEnrolledCourse(courseId));
-        } catch (error) {
-            console.error("Error unenrolling from course:", error);
-        }
-    };
 
     return (
         <div id="wd-dashboard">

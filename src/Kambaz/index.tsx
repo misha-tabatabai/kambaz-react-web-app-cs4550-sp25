@@ -3,14 +3,12 @@ import Account from "./Account";
 import Dashboard from "./Dashboard";
 import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
-import Enrollments from "./Enrollments";
 import "./styles.css";
 import { useEffect, useState } from "react";
 import { ProtectedRoute } from "./Account/ProtectedRoute";
 import Session from "./Account/Session";
 import * as courseClient from "./Courses/client";
-import { useSelector, useDispatch } from "react-redux";
-import { setEnrolledCourses } from "./Enrollments/reducer";
+import { useSelector } from "react-redux";
 import * as userClient from "./Account/client";
 
 export default function Kambaz() {
@@ -45,8 +43,6 @@ export default function Kambaz() {
     );
   };
  
- 
-
   const fetchCourses = async () => {
     try {
       const allCourses = await courseClient.fetchAllCourses();
@@ -84,7 +80,7 @@ export default function Kambaz() {
     setCourses([...courses, newCourse]);
   };
   const deleteCourse = async (courseId: any) => {
-    const status = await courseClient.deleteCourse(courseId);
+    await courseClient.deleteCourse(courseId);
     setCourses(courses.filter((course) => course._id !== courseId));
   };
   const updateCourse = async () => {
