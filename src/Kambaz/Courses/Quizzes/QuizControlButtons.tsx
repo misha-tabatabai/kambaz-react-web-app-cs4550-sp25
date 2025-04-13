@@ -1,4 +1,3 @@
-import { IoEllipsisVertical } from "react-icons/io5";
 import { FaCheckCircle, FaCircle } from "react-icons/fa";
 import { Dropdown } from "react-bootstrap";
 
@@ -6,7 +5,7 @@ interface QuizControlButtonsProps {
     quizId: string;
 }
 
-export default function QuizControlButtons({ quizId }: QuizControlButtonsProps) {
+export default function QuizControlButtons({ }: QuizControlButtonsProps) {
     return (
         <div className="float-end d-flex align-items-center">
             <span className="me-2 position-relative">

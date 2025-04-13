@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { Button, Form, Row, Col, FormControl, FormGroup, FormCheck } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Button, Row, Col, FormControl, FormGroup, FormCheck } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import quizQuestions from "../../Database/quizQuestions.json";
 
 interface Question {
   _id: string;
+  quizId: string;
   title: string;
   type: string;
   points: number;
@@ -14,13 +16,23 @@ interface Question {
 }
 
 export default function QuestionsEditor() {
+  const { qid } = useParams();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Load questions for the current quiz
+    const quizQuestionsList = (quizQuestions as Question[]).filter(
+      (q) => q.quizId === qid
+    );
+    setQuestions(quizQuestionsList.map(q => ({ ...q, isEditing: false })));
+  }, [qid]);
+
   const addNewQuestion = () => {
     const newQuestion: Question = {
       _id: Date.now().toString(),
+      quizId: qid || "",
       title: "",
       type: "multiple-choice",
       points: 0,

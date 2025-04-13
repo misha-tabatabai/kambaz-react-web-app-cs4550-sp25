@@ -1,14 +1,11 @@
-import { Col, FormControl, FormGroup, Nav, Tab, FormCheck, Row, Button } from "react-bootstrap";
+import { Col, FormControl, FormGroup, Nav, FormCheck, Row, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
-import * as coursesClient from "../client";
+import { useState } from "react";
 import QuestionsEditor from "./QuestionsEditor";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("details");
   const [hasTimeLimit, setHasTimeLimit] = useState(true);
   const [hasMultipleAttempts, setHasMultipleAttempts] = useState(false);

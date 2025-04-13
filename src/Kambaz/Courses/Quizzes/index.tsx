@@ -1,18 +1,40 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Button, FormControl, Row, Col } from "react-bootstrap";
 import QuizzesControls from "./QuizzesControls";
 import QuizControlButtons from "./QuizControlButtons";
 import quizzesData from "../../Database/quizzes.json";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRocket } from "react-icons/fa";
 
+interface Quiz {
+  _id: string;
+  title: string;
+  description: string;
+  points: number;
+  dueDate: string;
+  availableFrom: string;
+  availableUntil: string;
+  course: string;
+  quizType: string;
+  assignmentGroup: string;
+  shuffleAnswers: boolean;
+  timeLimit: number;
+  multipleAttempts: boolean;
+  showCorrectAnswers: boolean;
+  accessCode: string;
+  oneQuestionAtATime: boolean;
+  webcamRequired: boolean;
+  lockQuestionsAfterAnswering: boolean;
+  published: boolean;
+}
+
 export default function Quizzes() {
   const { cid } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const quizzes = quizzesData;
-
-  const filteredQuizzes = quizzes.filter((quiz) =>
+  
+  // Filter quizzes for the current course and search term
+  const filteredQuizzes = (quizzesData as unknown as Quiz[]).filter((quiz: Quiz) => 
+    quiz.course === cid && 
     quiz.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -29,7 +51,7 @@ export default function Quizzes() {
           <span style={{ fontSize: "1.5rem" }}>QUIZZES</span>
         </div>
         <ul className="wd-lessons list-group rounded-0">
-          {filteredQuizzes.map((quiz) => (
+          {filteredQuizzes.map((quiz: Quiz) => (
             <li key={quiz._id} className="wd-lesson list-group-item p-3 ps-1">
               <div className="d-flex align-items-center">
                 <FaRocket size="25" color="green" className="me-2" />

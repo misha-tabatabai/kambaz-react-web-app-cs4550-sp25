@@ -1,0 +1,113 @@
+[
+    {
+        "_id": "q1",
+        "quizId": "111",
+        "title": "What is HTML?",
+        "type": "multiple-choice",
+        "points": 20,
+        "choices": [
+            "A programming language",
+            "A markup language",
+            "A styling language",
+            "A database language"
+        ],
+        "correctAnswer": "1"
+    },
+    {
+        "_id": "q2",
+        "quizId": "111",
+        "title": "Which of the following is NOT a valid HTML tag?",
+        "type": "multiple-choice",
+        "points": 30,
+        "choices": [
+            "<div>",
+            "<span>",
+            "<container>",
+            "<p>"
+        ],
+        "correctAnswer": "2"
+    },
+    {
+        "_id": "q3",
+        "quizId": "111",
+        "title": "What does CSS stand for?",
+        "type": "fill-blank",
+        "points": 50,
+        "possibleAnswers": [
+            "Cascading Style Sheets",
+            "Cascading Style Sheet",
+            "cascading style sheets",
+            "cascading style sheet"
+        ]
+    },
+    {
+        "_id": "q4",
+        "quizId": "222",
+        "title": "What is React?",
+        "type": "multiple-choice",
+        "points": 25,
+        "choices": [
+            "A database management system",
+            "A JavaScript library for building user interfaces",
+            "A server-side framework",
+            "A programming language"
+        ],
+        "correctAnswer": "1"
+    },
+    {
+        "_id": "q5",
+        "quizId": "222",
+        "title": "In React, props are immutable.",
+        "type": "true-false",
+        "points": 25,
+        "correctAnswer": "true"
+    },
+    {
+        "_id": "q6",
+        "quizId": "222",
+        "title": "What hook is used to manage state in functional components?",
+        "type": "fill-blank",
+        "points": 50,
+        "possibleAnswers": [
+            "useState",
+            "use state",
+            "UseState",
+            "Use State"
+        ]
+    },
+    {
+        "_id": "q7",
+        "quizId": "333",
+        "title": "What is a primary key?",
+        "type": "multiple-choice",
+        "points": 30,
+        "choices": [
+            "A field that can contain null values",
+            "A field that uniquely identifies each record",
+            "A field that links to another table",
+            "A field that stores binary data"
+        ],
+        "correctAnswer": "1"
+    },
+    {
+        "_id": "q8",
+        "quizId": "333",
+        "title": "Normalization is the process of organizing data to minimize redundancy.",
+        "type": "true-false",
+        "points": 30,
+        "correctAnswer": "true"
+    },
+    {
+        "_id": "q9",
+        "quizId": "333",
+        "title": "What does SQL stand for?",
+        "type": "fill-blank",
+        "points": 40,
+        "possibleAnswers": [
+            "Structured Query Language",
+            "structured query language",
+            "Structured query language",
+            "structured Query Language"
+        ]
+    }
+]

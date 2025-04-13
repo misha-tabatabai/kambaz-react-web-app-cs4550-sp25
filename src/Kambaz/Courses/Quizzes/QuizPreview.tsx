@@ -1,16 +1,6 @@
 import { Button, Card, FormControl } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-interface Question {
-  _id: string;
-  title: string;
-  type: string;
-  points: number;
-  choices?: string[];
-  correctAnswer?: string;
-  possibleAnswers?: string[];
-}
-
 export default function QuizPreview() {
   const navigate = useNavigate();
   // TODO: Get questions from state or props
