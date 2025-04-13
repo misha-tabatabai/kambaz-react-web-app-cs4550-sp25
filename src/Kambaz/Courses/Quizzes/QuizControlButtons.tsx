@@ -2,7 +2,11 @@ import { IoEllipsisVertical } from "react-icons/io5";
 import { FaCheckCircle, FaCircle } from "react-icons/fa";
 import { Dropdown } from "react-bootstrap";
 
-export default function QuizControlButtons() {
+interface QuizControlButtonsProps {
+    quizId: string;
+}
+
+export default function QuizControlButtons({ quizId }: QuizControlButtonsProps) {
     return (
         <div className="float-end d-flex align-items-center">
             <span className="me-2 position-relative">
@@ -10,8 +14,8 @@ export default function QuizControlButtons() {
                 <FaCircle className="text-white me-1 fs-6" />
             </span>
             <Dropdown>
-                <Dropdown.Toggle variant="link" id="quiz-context-menu" className="text-dark p-0">
-                    <IoEllipsisVertical className="fs-4" />
+                <Dropdown.Toggle variant="light" id="dropdown-basic">
+                    ⋮
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
@@ -20,10 +24,9 @@ export default function QuizControlButtons() {
                     <Dropdown.Item>Publish</Dropdown.Item>
                     <Dropdown.Item>Copy</Dropdown.Item>
                     <Dropdown.Divider />
-                    <Dropdown.ItemText>Sort By</Dropdown.ItemText>
-                    <Dropdown.Item>Name</Dropdown.Item>
-                    <Dropdown.Item>Due Date</Dropdown.Item>
-                    <Dropdown.Item>Available Date</Dropdown.Item>
+                    <Dropdown.Item>Sort by Name</Dropdown.Item>
+                    <Dropdown.Item>Sort by Due Date</Dropdown.Item>
+                    <Dropdown.Item>Sort by Available Date</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         </div>

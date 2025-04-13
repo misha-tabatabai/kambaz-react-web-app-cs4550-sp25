@@ -1,8 +1,13 @@
-import { Button } from "react-bootstrap";
+import { Button, FormControl } from "react-bootstrap";
 import { FaPlus, FaEllipsisV } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 
-export default function QuizzesControls() {
+interface QuizzesControlsProps {
+    searchTerm: string;
+    setSearchTerm: (term: string) => void;
+}
+
+export default function QuizzesControls({ searchTerm, setSearchTerm }: QuizzesControlsProps) {
     const navigate = useNavigate();
     const { cid } = useParams();
 
@@ -12,7 +17,14 @@ export default function QuizzesControls() {
 
     return (
         <div id="wd-modules-controls" className="text-nowrap">
-            <input id="wd-search-quiz" className="form-control float-start w-50" type="search" placeholder="Search for Quizzes" />
+            <FormControl
+                type="text"
+                placeholder="Search for Quiz"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="me-2"
+                style={{ width: "300px" }}
+            />
 
             <Button variant="secondary" size="lg" className="me-1 float-end" id="wd-quiz-options">
                 <FaEllipsisV className="position-relative" style={{ bottom: "1px" }} />
