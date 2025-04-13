@@ -1,0 +1,25 @@
+#wd-quizzes {
+    margin: 20px;
+}
+
+#wd-quizzes .wd-title {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+}
+
+#wd-quizzes .wd-lesson {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+#wd-quizzes .wd-lesson:last-child {
+    border-bottom: 1px solid #ddd;
+}
+
+#wd-quizzes .wd-assignment-link {
+    text-decoration: none;
+}
+
+#wd-quizzes .wd-assignment-link:hover {
+    text-decoration: underline;
+} 
