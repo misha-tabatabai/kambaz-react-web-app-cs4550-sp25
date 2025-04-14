@@ -15,12 +15,10 @@ export default function AssignmentControlButtons2(
     return (
         <div className="float-end">
             {isFaculty && (
-                <>
-                    <FaTrash
-                        onClick={() => deleteAssignment(assignmentId)} 
-                        className="text-danger me-2 mb-1"
-                        />
-                </>
+                <FaTrash
+                    onClick={() => deleteAssignment(assignmentId)} 
+                    className="text-danger me-2 mb-1"
+                />
             )}
             <GreenCheckmark />
             <IoEllipsisVertical className="fs-4" />

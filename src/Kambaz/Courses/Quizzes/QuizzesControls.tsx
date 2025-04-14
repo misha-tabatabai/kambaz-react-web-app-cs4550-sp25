@@ -16,7 +16,7 @@ export default function QuizzesControls({ searchTerm, setSearchTerm }: QuizzesCo
     };
 
     return (
-        <div id="wd-modules-controls" className="text-nowrap">
+        <div id="wd-modules-controls" className="d-flex align-items-center justify-content-between">
             <FormControl
                 type="text"
                 placeholder="Search for Quiz"
@@ -26,14 +26,16 @@ export default function QuizzesControls({ searchTerm, setSearchTerm }: QuizzesCo
                 style={{ width: "300px" }}
             />
 
-            <Button variant="secondary" size="lg" className="me-1 float-end" id="wd-quiz-options">
-                <FaEllipsisV className="position-relative" style={{ bottom: "1px" }} />
-            </Button>
-            <Button variant="danger" size="lg" className="me-1 float-end" id="wd-add-quiz"
-                onClick={handleAddQuiz}>
-                <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-                Quiz
-            </Button>
+            <div className="d-flex">
+                <Button variant="danger" size="lg" className="me-1" id="wd-add-quiz"
+                    onClick={handleAddQuiz}>
+                    <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+                    Quiz
+                </Button>
+                <Button variant="secondary" size="lg" className="me-1" id="wd-quiz-options">
+                    <FaEllipsisV className="position-relative" style={{ bottom: "1px" }} />
+                </Button>
+            </div>
         </div>
     );
 } 

@@ -14,7 +14,10 @@ export default function Modules() {
   const [moduleName, setModuleName] = useState("");
   const { cid } = useParams();
   const { modules } = useSelector((state: any) => state.modulesReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
+  const isTeacher = currentUser?.role === "FACULTY";
+
   const updateModuleHandler = async (module: any) => {
     await modulesClient.updateModule(module);
     dispatch(updateModule(module));
@@ -52,11 +55,13 @@ export default function Modules() {
 
   return (
     <div className="wd-modules">
-      <ModulesControls
-        moduleName={moduleName}
-        setModuleName={setModuleName}
-        addModule={addModuleHandler}
-      />
+      {isTeacher && (
+        <ModulesControls
+          moduleName={moduleName}
+          setModuleName={setModuleName}
+          addModule={addModuleHandler}
+        />
+      )}
       <br /><br /><br /><br />
       <ListGroup id="wd-modules" className="rounded-0">
         {modules &&
@@ -69,7 +74,7 @@ export default function Modules() {
                 <div className="wd-title p-3 ps-2 bg-secondary">
                   <BsGripVertical className="me-2 fs-3" />
                   {!module.editing && module.name}
-                  {module.editing && (
+                  {module.editing && isTeacher && (
                     <FormControl
                       className="w-50 d-inline-block"
                       onChange={(e) =>
@@ -82,11 +87,13 @@ export default function Modules() {
                       defaultValue={module.name}
                     />
                   )}
-                  <ModuleControlButtons
-                    moduleId={module._id}
-                    deleteModule={(moduleId) => deleteModuleHandler(moduleId)}
-                    editModule={(moduleId) => dispatch(editModule(moduleId))}
-                  />
+                  {isTeacher && (
+                    <ModuleControlButtons
+                      moduleId={module._id}
+                      deleteModule={(moduleId) => deleteModuleHandler(moduleId)}
+                      editModule={(moduleId) => dispatch(editModule(moduleId))}
+                    />
+                  )}
                 </div>
                 {module.lessons && (
                   <ul className="wd-lessons list-group rounded-0">
@@ -96,7 +103,7 @@ export default function Modules() {
                         className="wd-lesson list-group-item p-3 ps-1"
                       >
                         <BsGripVertical className="me-2 fs-3" /> {lesson.name}
-                        <LessonControlButtons />
+                        {isTeacher && <LessonControlButtons />}
                       </li>
                     ))}
                   </ul>

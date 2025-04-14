@@ -1,7 +1,8 @@
 import { Col, FormControl, FormGroup, Nav, FormCheck, Row, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QuestionsEditor from "./QuestionsEditor";
+import quizzesData from "../../Database/quizzes.json";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
@@ -37,26 +38,24 @@ export default function QuizEditor() {
 
   const [quiz, setQuiz] = useState(defaultQuiz);
 
-//   useEffect(() => {
-//     const fetchQuiz = async () => {
-//       if (qid && qid !== "new") {
-//         try {
-//         //   const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
-//           const existingQuiz = quizzes.find((q: any) => q._id === qid);
-//           if (existingQuiz) {
-//             setQuiz({
-//               ...defaultQuiz,
-//               ...existingQuiz,
-//               course: cid
-//             });
-//           }
-//         } catch (error) {
-//           console.error("Failed to fetch quiz:", error);
-//         }
-//       }
-//     };
-//     fetchQuiz();
-//   }, [qid, cid]);
+  useEffect(() => {
+    if (qid && qid !== "new") {
+      const existingQuiz = (quizzesData as any[]).find((q) => q._id === qid);
+      if (existingQuiz) {
+        setQuiz({
+          ...defaultQuiz,
+          ...existingQuiz,
+          course: cid
+        });
+        setHasTimeLimit(true);
+        setHasMultipleAttempts(existingQuiz.multipleAttempts);
+        setShowCorrectAnswers(existingQuiz.showCorrectAnswers);
+        setOneQuestionAtATime(existingQuiz.oneQuestionAtATime);
+        setWebcamRequired(existingQuiz.webcamRequired);
+        setLockQuestionsAfterAnswering(existingQuiz.lockQuestionsAfterAnswering);
+      }
+    }
+  }, [qid, cid]);
 
   const handleSave = async () => {
     try {

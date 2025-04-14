@@ -32,7 +32,6 @@ export default function Quizzes() {
   const { cid } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Filter quizzes for the current course and search term
   const filteredQuizzes = (quizzesData as unknown as Quiz[]).filter((quiz: Quiz) => 
     quiz.course === cid && 
     quiz.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -44,7 +43,7 @@ export default function Quizzes() {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
-      <br /><br /><br /><hr /><br />
+      <br /><hr /><br />
       <ul className="rounded-0" id="wd-modules">
         <div className="wd-title p-3 ps-2 bg-secondary">
           <IoMdArrowDropdown />
