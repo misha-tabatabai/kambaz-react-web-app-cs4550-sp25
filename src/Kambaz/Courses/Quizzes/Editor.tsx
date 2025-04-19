@@ -29,6 +29,7 @@ export default function QuizEditor() {
     shuffleAnswers: true,
     timeLimit: 20,
     multipleAttempts: false,
+    attempts: 1,
     showCorrectAnswers: false,
     accessCode: "",
     oneQuestionAtATime: true,
@@ -242,12 +243,33 @@ export default function QuizEditor() {
             checked={quiz.shuffleAnswers}
             onChange={(e) => handleChange("shuffleAnswers", e.target.checked)}
           />
-          <FormCheck
-            type="checkbox"
-            label="Multiple Attempts"
-            checked={quiz.multipleAttempts}
-            onChange={(e) => handleChange("multipleAttempts", e.target.checked)}
-          />
+          <FormGroup className="mb-3">
+            <FormCheck
+              type="checkbox"
+              label="Multiple Attempts"
+              checked={quiz.multipleAttempts}
+              onChange={(e) => {
+                handleChange("multipleAttempts", e.target.checked);
+                if (!e.target.checked) {
+                  handleChange("attempts", 1);
+                }
+              }}
+            />
+            {quiz.multipleAttempts && (
+              <div className="mt-2">
+                <label>Number of Attempts</label>
+                <FormControl
+                  type="number"
+                  min="1"
+                  value={quiz.attempts || 1}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    handleChange("attempts", isNaN(value) ? 1 : Math.max(1, value));
+                  }}
+                />
+              </div>
+            )}
+          </FormGroup>
           <FormCheck
             type="checkbox"
             label="Show Correct Answers"

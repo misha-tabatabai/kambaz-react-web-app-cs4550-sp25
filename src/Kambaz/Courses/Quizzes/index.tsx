@@ -21,6 +21,7 @@ interface Quiz {
   shuffleAnswers: boolean;
   timeLimit: number;
   multipleAttempts: boolean;
+  attempts: number;
   showCorrectAnswers: boolean;
   accessCode: string;
   oneQuestionAtATime: boolean;
@@ -76,7 +77,7 @@ export default function Quizzes() {
                       <b>Available</b> {new Date(quiz.availableFrom).toLocaleDateString()} at 12:00am | 
                       <br /> 
                       <b>Due</b> {new Date(quiz.dueDate).toLocaleDateString()} at 11:59pm | 
-                      {quiz.points} pts
+                      {quiz.points} pts | {quiz.multipleAttempts ? `${quiz.attempts} Attempts` : "1 Attempt"}
                     </p>
                   </Link>
                 </div>
