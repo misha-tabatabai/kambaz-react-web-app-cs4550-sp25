@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button, Row, Col, FormControl, FormGroup, FormCheck } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import quizQuestions from "../../Database/quizQuestions.json";
+import * as quizQuestionsClient from "./client";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Question {
   _id: string;
@@ -22,27 +24,56 @@ export default function QuestionsEditor() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load questions for the current quiz
-    const quizQuestionsList = (quizQuestions as Question[]).filter(
-      (q) => q.quizId === qid
-    );
-    setQuestions(quizQuestionsList.map(q => ({ ...q, isEditing: false })));
+    const fetchQuestions = async () => {
+      if (qid) {
+        try {
+          const quizQuestions = await quizQuestionsClient.findQuestionsForQuiz(qid);
+          setQuestions(quizQuestions.map((q: Question) => ({ ...q, isEditing: false })));
+        } catch (error) {
+          console.error("Failed to fetch questions:", error);
+        }
+      }
+    };
+    fetchQuestions();
   }, [qid]);
 
-  const addNewQuestion = () => {
-    const newQuestion: Question = {
+  const addNewQuestion = async () => {
+    // Create a clean question object with only the base fields
+    const baseQuestion = {
       _id: Date.now().toString(),
       quizId: qid || "",
       title: "",
       type: "multiple-choice",
-      points: 0,
-      choices: ["", "", "", ""],
-      correctAnswer: "0",
-      possibleAnswers: [],
-      isEditing: true
+      points: 0
     };
-    setQuestions([...questions, newQuestion]);
-    setEditingQuestion(newQuestion);
+
+    // Add type-specific fields
+    let questionToSave;
+    if (baseQuestion.type === "multiple-choice") {
+      questionToSave = {
+        ...baseQuestion,
+        choices: ["", "", "", ""],
+        correctAnswer: "0"
+      };
+    } else if (baseQuestion.type === "true-false") {
+      questionToSave = {
+        ...baseQuestion,
+        correctAnswer: "true"
+      };
+    } else if (baseQuestion.type === "fill-blank") {
+      questionToSave = {
+        ...baseQuestion,
+        possibleAnswers: [""]
+      };
+    }
+
+    try {
+      const savedQuestion = await quizQuestionsClient.createQuizQuestion(qid || "", questionToSave);
+      setQuestions([...questions, { ...savedQuestion, isEditing: true }]);
+      setEditingQuestion({ ...savedQuestion, isEditing: true });
+    } catch (error) {
+      console.error("Failed to create question:", error);
+    }
   };
 
   const handleEdit = (question: Question) => {
@@ -52,12 +83,46 @@ export default function QuestionsEditor() {
     ));
   };
 
-  const handleSave = () => {
-    if (editingQuestion) {
-      setQuestions(questions.map(q => 
-        q._id === editingQuestion._id ? { ...editingQuestion, isEditing: false } : q
-      ));
-      setEditingQuestion(null);
+  const handleSave = async () => {
+    if (editingQuestion && qid) {
+      try {
+        // Create a clean question object with only the base fields
+        const baseQuestion = {
+          _id: editingQuestion._id,
+          quizId: editingQuestion.quizId,
+          title: editingQuestion.title,
+          type: editingQuestion.type,
+          points: editingQuestion.points
+        };
+
+        // Add type-specific fields
+        let questionToSave;
+        if (editingQuestion.type === "multiple-choice") {
+          questionToSave = {
+            ...baseQuestion,
+            choices: editingQuestion.choices,
+            correctAnswer: editingQuestion.correctAnswer
+          };
+        } else if (editingQuestion.type === "true-false") {
+          questionToSave = {
+            ...baseQuestion,
+            correctAnswer: editingQuestion.correctAnswer
+          };
+        } else if (editingQuestion.type === "fill-blank") {
+          questionToSave = {
+            ...baseQuestion,
+            possibleAnswers: editingQuestion.possibleAnswers
+          };
+        }
+
+        const updatedQuestion = await quizQuestionsClient.updateQuizQuestion(editingQuestion._id, questionToSave);
+        setQuestions(questions.map(q => 
+          q._id === editingQuestion._id ? { ...updatedQuestion, isEditing: false } : q
+        ));
+        setEditingQuestion(null);
+      } catch (error) {
+        console.error("Failed to update question:", error);
+      }
     }
   };
 
@@ -67,6 +132,17 @@ export default function QuestionsEditor() {
         q._id === editingQuestion._id ? { ...q, isEditing: false } : q
       ));
       setEditingQuestion(null);
+    }
+  };
+
+  const handleDelete = async (questionId: string) => {
+    if (qid) {
+      try {
+        await quizQuestionsClient.deleteQuizQuestion(questionId);
+        setQuestions(questions.filter(q => q._id !== questionId));
+      } catch (error) {
+        console.error("Failed to delete question:", error);
+      }
     }
   };
 
@@ -121,12 +197,21 @@ export default function QuestionsEditor() {
           {question.isEditing ? (
             <div>
               <FormGroup className="mb-3">
-                <FormControl
-                  as="textarea"
-                  rows={3}
+                <label>Question Text</label>
+                <ReactQuill
                   value={editingQuestion?.title || ""}
-                  onChange={(e) => handleChange("title", e.target.value)}
-                  placeholder="Enter question text"
+                  onChange={(content) => handleChange("title", content)}
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      [{ 'indent': '-1'}, { 'indent': '+1' }],
+                      ['link', 'image'],
+                      ['clean']
+                    ],
+                  }}
+                  style={{ height: '200px', marginBottom: '50px' }}
                 />
               </FormGroup>
 
@@ -202,53 +287,51 @@ export default function QuestionsEditor() {
 
               {editingQuestion?.type === "fill-blank" && (
                 <div>
-                  <div className="mb-3">
-                    <label>Possible Answers</label>
-                    {editingQuestion.possibleAnswers?.map((answer, index) => (
-                      <div key={index} className="d-flex align-items-center mb-2">
+                  {editingQuestion.possibleAnswers?.map((answer, index) => (
+                    <FormGroup key={index} className="mb-2">
+                      <div className="d-flex">
                         <FormControl
                           value={answer}
                           onChange={(e) => updatePossibleAnswer(index, e.target.value)}
-                          placeholder="Enter possible answer"
-                          className="me-2"
+                          placeholder={`Possible Answer ${index + 1}`}
                         />
                         <Button
                           variant="outline-danger"
-                          size="sm"
+                          className="ms-2"
                           onClick={() => removePossibleAnswer(index)}
                         >
-                          Remove
+                          X
                         </Button>
                       </div>
-                    ))}
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={addPossibleAnswer}
-                      className="mt-2"
-                    >
-                      + Add Another Answer
-                    </Button>
-                  </div>
+                    </FormGroup>
+                  ))}
+                  <Button variant="outline-secondary" className="mb-2" onClick={addPossibleAnswer}>
+                    + Add Possible Answer
+                  </Button>
                 </div>
               )}
 
               <div className="mt-3">
-                <Button variant="secondary" onClick={handleCancel} className="me-2">
-                  Cancel
-                </Button>
-                <Button variant="primary" onClick={handleSave}>
+                <Button variant="primary" className="me-2" onClick={handleSave}>
                   Save
+                </Button>
+                <Button variant="secondary" onClick={handleCancel}>
+                  Cancel
                 </Button>
               </div>
             </div>
           ) : (
             <div>
               <div className="d-flex justify-content-between align-items-center">
-                <h5>{question.title}</h5>
-                <Button variant="outline-primary" onClick={() => handleEdit(question)}>
-                  Edit
-                </Button>
+                <div dangerouslySetInnerHTML={{ __html: question.title }} />
+                <div>
+                  <Button variant="outline-primary" className="me-2" onClick={() => handleEdit(question)}>
+                    Edit
+                  </Button>
+                  <Button variant="outline-danger" onClick={() => handleDelete(question._id)}>
+                    Delete
+                  </Button>
+                </div>
               </div>
               <p className="text-muted">{question.points} pts</p>
               {question.type === "multiple-choice" && (
@@ -277,7 +360,6 @@ export default function QuestionsEditor() {
               )}
               {question.type === "fill-blank" && (
                 <div>
-                  <p className="mb-2">{question.title}</p>
                   <div>
                     <strong>Possible Answers:</strong>
                     <ul className="mt-2">

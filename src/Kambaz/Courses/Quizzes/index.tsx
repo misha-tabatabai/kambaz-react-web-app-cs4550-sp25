@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import QuizzesControls from "./QuizzesControls";
 import QuizControlButtons from "./QuizControlButtons";
-import quizzesData from "../../Database/quizzes.json";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRocket } from "react-icons/fa";
-
+import { setQuizzes } from "./reducer";
+import * as coursesClient from "../client";
 interface Quiz {
   _id: string;
   title: string;
@@ -30,11 +31,22 @@ interface Quiz {
 
 export default function Quizzes() {
   const { cid } = useParams();
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   
-  const filteredQuizzes = (quizzesData as unknown as Quiz[]).filter((quiz: Quiz) => 
-    quiz.course === cid && 
-    quiz.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchQuizzes = async () => {
+    if (!cid) return;
+    const quizzes = await coursesClient.findQuizzesForCourse(cid);
+    dispatch(setQuizzes(quizzes));
+  };
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, [cid]);
+
+  const filteredQuizzes = quizzes.filter((quiz: Quiz) => 
+    quiz.title && quiz.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -68,7 +80,7 @@ export default function Quizzes() {
                     </p>
                   </Link>
                 </div>
-                <QuizControlButtons quizId={quiz._id} />
+                <QuizControlButtons quizId={quiz._id} published={quiz.published} />
               </div>
             </li>
           ))}

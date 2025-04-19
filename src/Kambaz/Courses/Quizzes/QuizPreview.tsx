@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button, Card, FormControl, FormCheck } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import quizQuestions from "../../Database/quizQuestions.json";
+import * as quizQuestionsClient from "./client";
+import QuizResults from "./QuizResults";
 
 interface Question {
   _id: string;
@@ -19,13 +20,20 @@ export default function QuizPreview() {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
-    // Load questions for the current quiz
-    const quizQuestionsList = (quizQuestions as Question[]).filter(
-      (q) => q.quizId === qid
-    );
-    setQuestions(quizQuestionsList);
+    const fetchQuestions = async () => {
+      if (qid) {
+        try {
+          const quizQuestions = await quizQuestionsClient.findQuestionsForQuiz(qid);
+          setQuestions(quizQuestions);
+        } catch (error) {
+          console.error("Failed to fetch questions:", error);
+        }
+      }
+    };
+    fetchQuestions();
   }, [qid]);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
@@ -33,9 +41,12 @@ export default function QuizPreview() {
   };
 
   const handleSubmit = () => {
-    // TODO: Implement quiz submission
-    console.log("Answers:", answers);
+    setShowResults(true);
   };
+
+  if (showResults) {
+    return <QuizResults questions={questions} answers={answers} onBack={() => setShowResults(false)} />;
+  }
 
   return (
     <div>
@@ -58,7 +69,7 @@ export default function QuizPreview() {
         <Card key={question._id} className="mb-3">
           <Card.Body>
             <h5>Question {index + 1} ({question.points} points)</h5>
-            <p>{question.title}</p>
+            <div dangerouslySetInnerHTML={{ __html: question.title }} />
             
             {question.type === "multiple-choice" && question.choices && (
               <div className="mb-3">
@@ -108,8 +119,10 @@ export default function QuizPreview() {
         </Card>
       ))}
 
-      <div className="d-flex justify-content-end">
-        <Button variant="primary" onClick={handleSubmit}>Submit Quiz</Button>
+      <div className="mt-4">
+        <Button variant="primary" onClick={handleSubmit}>
+          Submit Quiz
+        </Button>
       </div>
     </div>
   );
