@@ -7,6 +7,8 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRocket } from "react-icons/fa";
 import { setQuizzes } from "./reducer";
 import * as coursesClient from "../client";
+import { FormControl } from "react-bootstrap";
+
 interface Quiz {
   _id: string;
   title: string;
@@ -21,13 +23,13 @@ interface Quiz {
   shuffleAnswers: boolean;
   timeLimit: number;
   multipleAttempts: boolean;
-  attempts: number;
   showCorrectAnswers: boolean;
   accessCode: string;
   oneQuestionAtATime: boolean;
   webcamRequired: boolean;
   lockQuestionsAfterAnswering: boolean;
   published: boolean;
+  attempts: number;
 }
 
 export default function Quizzes() {
@@ -35,6 +37,8 @@ export default function Quizzes() {
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
   
   const fetchQuizzes = async () => {
     if (!cid) return;
@@ -46,16 +50,26 @@ export default function Quizzes() {
     fetchQuizzes();
   }, [cid]);
 
-  const filteredQuizzes = quizzes.filter((quiz: Quiz) => 
-    quiz.title && quiz.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredQuizzes = quizzes && quizzes
+    .filter((quiz: Quiz) => quiz.course === cid)
+    .filter((quiz: Quiz) => 
+      (quiz.title || "").toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((quiz: Quiz) => isFaculty || quiz.published);
 
   return (
     <div id="wd-quizzes">
-      <QuizzesControls
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-      />
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <FormControl
+          type="text"
+          placeholder="Search for Quiz"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="me-2"
+          style={{ width: "300px" }}
+        />
+        {isFaculty && <QuizzesControls />}
+      </div>
       <br /><hr /><br />
       <ul className="rounded-0" id="wd-modules">
         <div className="wd-title p-3 ps-2 bg-secondary">
@@ -70,7 +84,7 @@ export default function Quizzes() {
                 <div className="flex-grow-1">
                   <Link
                     className="wd-quiz-link text-black link-underline link-underline-opacity-0"
-                    to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}
+                    to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}${isFaculty ? '' : '/preview'}`}
                   >
                     <h4>{quiz.title}</h4>
                     <p>

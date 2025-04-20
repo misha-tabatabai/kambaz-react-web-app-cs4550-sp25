@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Button, Card, FormCheck } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 interface Question {
   _id: string;
@@ -15,12 +17,15 @@ interface Question {
 interface QuizResultsProps {
   questions: Question[];
   answers: Record<string, string>;
-  onBack: () => void;
 }
 
-export default function QuizResults({ questions, answers, onBack }: QuizResultsProps) {
+export default function QuizResults({ questions, answers }: QuizResultsProps) {
   const [score, setScore] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
+  const navigate = useNavigate();
+  const { cid } = useParams();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
 
   useEffect(() => {
     let correctCount = 0;
@@ -53,8 +58,11 @@ export default function QuizResults({ questions, answers, onBack }: QuizResultsP
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Quiz Results</h2>
-        <Button variant="secondary" onClick={onBack}>
-          Back to Quiz
+        <Button 
+          variant="secondary" 
+          onClick={() => navigate(isFaculty ? `edit` : `/Kambaz/Courses/${cid}/Quizzes`)}
+        >
+          {isFaculty ? "Back to Editor" : "Exit"}
         </Button>
       </div>
 
@@ -76,15 +84,24 @@ export default function QuizResults({ questions, answers, onBack }: QuizResultsP
                 {question.choices.map((choice, choiceIndex) => {
                   const isUserAnswer = answers[question._id] === choiceIndex.toString();
                   const isCorrectAnswer = question.correctAnswer === choiceIndex.toString();
+                  const isCorrect = isUserAnswer && isCorrectAnswer;
+                  const isIncorrect = isUserAnswer && !isCorrectAnswer;
                   return (
-                    <div key={choiceIndex} className={`mb-2 ${isUserAnswer ? (isCorrectAnswer ? 'text-success' : 'text-danger') : ''}`}>
-                      <FormCheck
-                        type="radio"
-                        label={choice}
-                        checked={isUserAnswer}
-                        disabled
-                      />
-                      {isCorrectAnswer && <span className="ms-2">✓ Correct Answer</span>}
+                    <div 
+                      key={choiceIndex} 
+                      className={`mb-2 p-2 rounded ${isCorrect ? 'bg-success bg-opacity-10 border border-success' : isIncorrect ? 'bg-danger bg-opacity-10 border border-danger' : ''}`}
+                    >
+                      <div className="d-flex align-items-center">
+                        <span className={`me-2 ${isCorrect ? 'text-success' : isIncorrect ? 'text-danger' : ''}`}>
+                          {isCorrect ? '✓' : isIncorrect ? '✗' : '○'}
+                        </span>
+                        <span className={isCorrect ? 'text-success' : isIncorrect ? 'text-danger' : ''}>
+                          {choice}
+                        </span>
+                        {isCorrectAnswer && !isUserAnswer && (
+                          <span className="ms-2 text-success">✓ Correct Answer</span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -93,39 +110,56 @@ export default function QuizResults({ questions, answers, onBack }: QuizResultsP
 
             {question.type === "true-false" && (
               <div className="mt-3">
-                <div className={`mb-2 ${answers[question._id] === "true" ? (question.correctAnswer === "true" ? 'text-success' : 'text-danger') : ''}`}>
-                  <FormCheck
-                    type="radio"
-                    label="True"
-                    checked={answers[question._id] === "true"}
-                    disabled
-                  />
-                  {question.correctAnswer === "true" && <span className="ms-2">✓ Correct Answer</span>}
+                <div className={`mb-2 p-2 rounded ${answers[question._id] === "true" ? (question.correctAnswer === "true" ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') : ''}`}>
+                  <div className="d-flex align-items-center">
+                    <span className={`me-2 ${answers[question._id] === "true" ? (question.correctAnswer === "true" ? 'text-success' : 'text-danger') : ''}`}>
+                      {answers[question._id] === "true" ? (question.correctAnswer === "true" ? '✓' : '✗') : '○'}
+                    </span>
+                    <span className={answers[question._id] === "true" ? (question.correctAnswer === "true" ? 'text-success' : 'text-danger') : ''}>
+                      True
+                    </span>
+                    {question.correctAnswer === "true" && answers[question._id] !== "true" && (
+                      <span className="ms-2 text-success">✓ Correct Answer</span>
+                    )}
+                  </div>
                 </div>
-                <div className={`mb-2 ${answers[question._id] === "false" ? (question.correctAnswer === "false" ? 'text-success' : 'text-danger') : ''}`}>
-                  <FormCheck
-                    type="radio"
-                    label="False"
-                    checked={answers[question._id] === "false"}
-                    disabled
-                  />
-                  {question.correctAnswer === "false" && <span className="ms-2">✓ Correct Answer</span>}
+                <div className={`mb-2 p-2 rounded ${answers[question._id] === "false" ? (question.correctAnswer === "false" ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') : ''}`}>
+                  <div className="d-flex align-items-center">
+                    <span className={`me-2 ${answers[question._id] === "false" ? (question.correctAnswer === "false" ? 'text-success' : 'text-danger') : ''}`}>
+                      {answers[question._id] === "false" ? (question.correctAnswer === "false" ? '✓' : '✗') : '○'}
+                    </span>
+                    <span className={answers[question._id] === "false" ? (question.correctAnswer === "false" ? 'text-success' : 'text-danger') : ''}>
+                      False
+                    </span>
+                    {question.correctAnswer === "false" && answers[question._id] !== "false" && (
+                      <span className="ms-2 text-success">✓ Correct Answer</span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
 
             {question.type === "fill-blank" && (
               <div className="mt-3">
-                <div className="mb-2">
-                  <strong>Your Answer:</strong> {answers[question._id] || "No answer provided"}
+                <div className={`mb-2 p-2 rounded ${question.possibleAnswers?.includes(answers[question._id] || '') ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger'}`}>
+                  <div className="d-flex align-items-center">
+                    <span className={`me-2 ${question.possibleAnswers?.includes(answers[question._id] || '') ? 'text-success' : 'text-danger'}`}>
+                      {question.possibleAnswers?.includes(answers[question._id] || '') ? '✓' : '✗'}
+                    </span>
+                    <span>
+                      <strong>Your Answer:</strong> {answers[question._id] || "No answer provided"}
+                    </span>
+                  </div>
                 </div>
-                <div>
+                <div className="mt-2">
                   <strong>Correct Answers:</strong>
-                  <ul className="mt-2">
+                  <ul className="mt-2 list-unstyled">
                     {question.possibleAnswers?.map((answer, index) => (
-                      <li key={index} className={answer === answers[question._id] ? 'text-success' : ''}>
+                      <li 
+                        key={index} 
+                        className={`p-2 rounded ${answer === answers[question._id] ? 'bg-success bg-opacity-10 border border-success' : ''}`}
+                      >
                         {answer}
-                        {answer === answers[question._id] && <span className="ms-2">✓ Your Answer</span>}
                       </li>
                     ))}
                   </ul>

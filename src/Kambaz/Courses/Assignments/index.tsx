@@ -41,7 +41,7 @@ export default function Assignments() {
   const filteredAssignments = assignments && assignments
     .filter((assignment: any) => assignment.course === cid)
     .filter((assignment: any) => 
-      (assignment.title || assignment.name)
+      ((assignment.title || assignment.name || ""))
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );

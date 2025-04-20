@@ -3,6 +3,7 @@ import { Button, Card, FormControl, FormCheck } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import * as quizQuestionsClient from "./client";
 import QuizResults from "./QuizResults";
+import { useSelector } from "react-redux";
 
 interface Question {
   _id: string;
@@ -17,10 +18,13 @@ interface Question {
 
 export default function QuizPreview() {
   const { qid } = useParams();
+  const { cid } = useParams();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -45,15 +49,18 @@ export default function QuizPreview() {
   };
 
   if (showResults) {
-    return <QuizResults questions={questions} answers={answers} onBack={() => setShowResults(false)} />;
+    return <QuizResults questions={questions} answers={answers} />;
   }
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Quiz Preview</h2>
-        <Button variant="secondary" onClick={() => navigate(-1)}>
-          Back to Editor
+        <Button
+          variant="outline-secondary"
+          onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes`)}
+        >
+          Back to {isFaculty ? "Editor" : "Quizzes"}
         </Button>
       </div>
       <hr />
