@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { Button, Card } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
 
 interface Question {
   _id: string;
@@ -17,59 +15,61 @@ interface Question {
 interface QuizResultsProps {
   questions: Question[];
   answers: Record<string, string>;
+  onBack: () => void;
+  isNewSubmission?: boolean;
 }
 
-export default function QuizResults({ questions, answers }: QuizResultsProps) {
-  const [score, setScore] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const navigate = useNavigate();
+export default function QuizResults({ questions, answers, onBack, isNewSubmission = false }: QuizResultsProps) {
   const { cid } = useParams();
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const isFaculty = currentUser?.role === "FACULTY";
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    let correctCount = 0;
+  const calculateScore = () => {
     let totalPoints = 0;
+    let earnedPoints = 0;
 
-    questions.forEach(question => {
+    questions.forEach((question) => {
       totalPoints += question.points;
       const userAnswer = answers[question._id];
       
-      if (question.type === "multiple-choice") {
+      if (question.type === "multiple-choice" || question.type === "true-false") {
         if (userAnswer === question.correctAnswer) {
-          correctCount += question.points;
-        }
-      } else if (question.type === "true-false") {
-        if (userAnswer === question.correctAnswer) {
-          correctCount += question.points;
+          earnedPoints += question.points;
         }
       } else if (question.type === "fill-blank") {
-        if (question.possibleAnswers?.includes(userAnswer)) {
-          correctCount += question.points;
+        if (question.possibleAnswers?.includes(userAnswer?.toLowerCase() || "")) {
+          earnedPoints += question.points;
         }
       }
     });
 
-    setScore(correctCount);
-    setTotalPoints(totalPoints);
-  }, [questions, answers]);
+    return { totalPoints, earnedPoints };
+  };
+
+  const { totalPoints, earnedPoints } = calculateScore();
+  const percentage = totalPoints === 0 ? 0 : (earnedPoints / totalPoints) * 100;
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Quiz Results</h2>
-        <Button 
-          variant="secondary" 
-          onClick={() => navigate(isFaculty ? `edit` : `/Kambaz/Courses/${cid}/Quizzes`)}
+        <Button
+          variant="outline-secondary"
+          onClick={() => {
+            if (isNewSubmission) {
+              navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+            } else {
+              onBack();
+            }
+          }}
         >
-          {isFaculty ? "Back to Editor" : "Exit"}
+          {isNewSubmission ? "Back to Quizzes" : "Back to Quiz"}
         </Button>
       </div>
 
       <Card className="mb-4">
         <Card.Body className="text-center">
-          <h3>Your Score: {score} / {totalPoints}</h3>
-          <h4 className="text-muted">{Math.round((score / totalPoints) * 100)}%</h4>
+          <h3>Your Score: {earnedPoints} / {totalPoints}</h3>
+          <h4 className="text-muted">{Math.round(percentage)}%</h4>
         </Card.Body>
       </Card>
 
@@ -81,14 +81,22 @@ export default function QuizResults({ questions, answers }: QuizResultsProps) {
             
             {question.type === "multiple-choice" && question.choices && (
               <div className="mt-3">
+                {!answers[question._id] && (
+                  <div className="mb-2 p-2 rounded bg-danger bg-opacity-10 border border-danger">
+                    <div className="d-flex align-items-center">
+                      <span className="me-2 text-danger">✗</span>
+                      <span>Your Answer: No answer provided</span>
+                    </div>
+                  </div>
+                )}
                 {question.choices.map((choice, choiceIndex) => {
                   const isUserAnswer = answers[question._id] === choiceIndex.toString();
                   const isCorrectAnswer = question.correctAnswer === choiceIndex.toString();
                   const isCorrect = isUserAnswer && isCorrectAnswer;
                   const isIncorrect = isUserAnswer && !isCorrectAnswer;
                   return (
-                    <div 
-                      key={choiceIndex} 
+                    <div
+                      key={choiceIndex}
                       className={`mb-2 p-2 rounded ${isCorrect ? 'bg-success bg-opacity-10 border border-success' : isIncorrect ? 'bg-danger bg-opacity-10 border border-danger' : ''}`}
                     >
                       <div className="d-flex align-items-center">
@@ -110,6 +118,14 @@ export default function QuizResults({ questions, answers }: QuizResultsProps) {
 
             {question.type === "true-false" && (
               <div className="mt-3">
+                {!answers[question._id] && (
+                  <div className="mb-2 p-2 rounded bg-danger bg-opacity-10 border border-danger">
+                    <div className="d-flex align-items-center">
+                      <span className="me-2 text-danger">✗</span>
+                      <span className="text-danger">Your Answer: No answer provided</span>
+                    </div>
+                  </div>
+                )}
                 <div className={`mb-2 p-2 rounded ${answers[question._id] === "true" ? (question.correctAnswer === "true" ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') : ''}`}>
                   <div className="d-flex align-items-center">
                     <span className={`me-2 ${answers[question._id] === "true" ? (question.correctAnswer === "true" ? 'text-success' : 'text-danger') : ''}`}>
