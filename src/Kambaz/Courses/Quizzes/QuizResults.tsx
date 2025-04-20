@@ -122,7 +122,7 @@ export default function QuizResults({ questions, answers, onBack, isNewSubmissio
                   <div className="mb-2 p-2 rounded bg-danger bg-opacity-10 border border-danger">
                     <div className="d-flex align-items-center">
                       <span className="me-2 text-danger">✗</span>
-                      <span className="text-danger">Your Answer: No answer provided</span>
+                      <span>Your Answer: No answer provided</span>
                     </div>
                   </div>
                 )}
@@ -163,7 +163,7 @@ export default function QuizResults({ questions, answers, onBack, isNewSubmissio
                       {question.possibleAnswers?.includes(answers[question._id] || '') ? '✓' : '✗'}
                     </span>
                     <span>
-                      <strong>Your Answer:</strong> {answers[question._id] || "No answer provided"}
+                      Your Answer: {answers[question._id] || "No answer provided"}
                     </span>
                   </div>
                 </div>

@@ -69,11 +69,6 @@ export default function QuizControlButtons({ quizId, published }: QuizControlBut
                     ) : (
                         <Dropdown.Item onClick={handlePublish}>Publish</Dropdown.Item>
                     )}
-                    <Dropdown.Item>Copy</Dropdown.Item>
-                    <Dropdown.Divider />
-                    <Dropdown.Item>Sort by Name</Dropdown.Item>
-                    <Dropdown.Item>Sort by Due Date</Dropdown.Item>
-                    <Dropdown.Item>Sort by Available Date</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         </div>

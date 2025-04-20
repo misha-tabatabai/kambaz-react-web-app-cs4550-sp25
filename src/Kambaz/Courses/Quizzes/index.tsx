@@ -7,6 +7,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRocket } from "react-icons/fa";
 import { setQuizzes } from "./reducer";
 import * as coursesClient from "../client";
+import * as quizQuestionsClient from "./client";
 import { FormControl } from "react-bootstrap";
 
 interface Quiz {
@@ -39,16 +40,60 @@ export default function Quizzes() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+  const [studentAttempts, setStudentAttempts] = useState<Record<string, any>>({});
   
   const fetchQuizzes = async () => {
     if (!cid) return;
     const quizzes = await coursesClient.findQuizzesForCourse(cid);
     dispatch(setQuizzes(quizzes));
+
+    // If student, fetch their attempts for all quizzes
+    if (!isFaculty && currentUser) {
+      const attempts = await Promise.all(
+        quizzes.map((quiz: Quiz) => 
+          quizQuestionsClient.findStudentQuizzesByStudentAndQuiz(currentUser._id, quiz._id)
+        )
+      );
+      const attemptsMap = quizzes.reduce((acc: any, quiz: Quiz, index: number) => {
+        acc[quiz._id] = attempts[index];
+        return acc;
+      }, {});
+      setStudentAttempts(attemptsMap);
+    }
   };
 
   useEffect(() => {
     fetchQuizzes();
   }, [cid]);
+
+  const getLastAttemptScore = (quizId: string) => {
+    const attempts = studentAttempts[quizId] || [];
+    if (attempts.length === 0) return null;
+    const lastAttempt = attempts.sort((a: any, b: any) => 
+      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    )[0];
+    return `${lastAttempt.score}/${lastAttempt.totalPoints}`;
+  };
+
+  const getNumberOfQuestions = async (quizId: string) => {
+    const questions = await quizQuestionsClient.findQuestionsForQuiz(quizId);
+    return questions.length;
+  };
+
+  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchQuestionCounts = async () => {
+      const counts: Record<string, number> = {};
+      for (const quiz of quizzes) {
+        counts[quiz._id] = await getNumberOfQuestions(quiz._id);
+      }
+      setQuestionCounts(counts);
+    };
+    if (quizzes.length > 0) {
+      fetchQuestionCounts();
+    }
+  }, [quizzes]);
 
   const filteredQuizzes = quizzes && quizzes
     .filter((quiz: Quiz) => quiz.course === cid)
@@ -56,6 +101,20 @@ export default function Quizzes() {
       (quiz.title || "").toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((quiz: Quiz) => isFaculty || quiz.published);
+
+  const getAvailabilityStatus = (quiz: Quiz) => {
+    const now = new Date();
+    const availableFrom = new Date(quiz.availableFrom);
+    const availableUntil = new Date(quiz.availableUntil);
+
+    if (now > availableUntil) {
+      return "Closed";
+    } else if (now >= availableFrom && now <= availableUntil) {
+      return "Available";
+    } else {
+      return `Not available until ${availableFrom.toLocaleDateString()}`;
+    }
+  };
 
   return (
     <div id="wd-quizzes">
@@ -88,10 +147,13 @@ export default function Quizzes() {
                   >
                     <h4>{quiz.title}</h4>
                     <p>
-                      <b>Available</b> {new Date(quiz.availableFrom).toLocaleDateString()} at 12:00am | 
+                      <b>Availability</b> {getAvailabilityStatus(quiz)} | 
                       <br /> 
                       <b>Due</b> {new Date(quiz.dueDate).toLocaleDateString()} at 11:59pm | 
-                      {quiz.points} pts | {quiz.multipleAttempts ? `${quiz.attempts} Attempts` : "1 Attempt"}
+                      {quiz.points} pts | {questionCounts[quiz._id] || 0} Questions
+                      {!isFaculty && studentAttempts[quiz._id]?.length > 0 && (
+                        <> | <b>Score</b> {getLastAttemptScore(quiz._id)}</>
+                      )}
                     </p>
                   </Link>
                 </div>

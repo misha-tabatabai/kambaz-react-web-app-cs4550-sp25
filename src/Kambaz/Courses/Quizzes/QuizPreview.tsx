@@ -14,6 +14,7 @@ interface Question {
   choices?: string[];
   correctAnswer?: string;
   possibleAnswers?: string[];
+  description: string;
 }
 
 interface StudentQuiz {
@@ -159,7 +160,7 @@ export default function QuizPreview() {
           variant="outline-secondary"
           onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes`)}
         >
-          Back to {isFaculty ? "Editor" : "Quizzes"}
+          Back to {isFaculty ? "Home" : "Quizzes"}
         </Button>
       </div>
       <hr />
@@ -217,7 +218,8 @@ export default function QuizPreview() {
         <Card key={question._id} className="mb-3">
           <Card.Body>
             <h5>Question {index + 1} ({question.points} points)</h5>
-            <div dangerouslySetInnerHTML={{ __html: question.title }} />
+            <h6>{question.title}</h6>
+            <div dangerouslySetInnerHTML={{ __html: question.description }} />
             
             {question.type === "multiple-choice" && question.choices && (
               <div className="mb-3">

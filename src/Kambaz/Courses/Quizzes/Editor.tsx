@@ -70,15 +70,21 @@ export default function QuizEditor() {
     fetchQuiz();
   }, [qid, cid]);
 
-  const handleSave = async () => {
+  const handleSave = async (publish: boolean = false) => {
     try {
       if (!cid) return;
       
       if (qid === "new") {
-        const newQuiz = await coursesClient.createQuizForCourse(cid, quiz);
+        const newQuiz = await coursesClient.createQuizForCourse(cid, {
+          ...quiz,
+          published: publish
+        });
         dispatch(addQuiz(newQuiz));
       } else {
-        const updatedQuiz = await quizzesClient.updateQuiz(quiz);
+        const updatedQuiz = await quizzesClient.updateQuiz({
+          ...quiz,
+          published: publish
+        });
         dispatch(updateQuiz(updatedQuiz));
       }
       navigate(`/Kambaz/Courses/${cid}/Quizzes`);
@@ -171,6 +177,7 @@ export default function QuizEditor() {
                   type="number"
                   value={quiz.points}
                   onChange={(e) => handleChange("points", e.target.value)}
+                  disabled={true}
                 />
               </FormGroup>
             </Col>
@@ -299,21 +306,23 @@ export default function QuizEditor() {
               placeholder="Optional"
             />
           </FormGroup>
+          <div className="mt-3">
+            <Button variant="primary" onClick={() => handleSave(false)}>
+              Save
+            </Button>
+            <Button variant="success" className="ms-2" onClick={() => handleSave(true)}>
+              Save & Publish
+            </Button>
+            <Button variant="secondary" className="ms-2" onClick={handleCancel}>
+              Cancel
+            </Button>
+          </div>
         </div>
       )}
 
       {activeTab === "questions" && (
         <QuestionsEditor />
       )}
-
-      <div className="mt-3">
-        <Button variant="primary" onClick={handleSave}>
-          Save
-        </Button>
-        <Button variant="secondary" className="ms-2" onClick={handleCancel}>
-          Cancel
-        </Button>
-      </div>
     </div>
   );
 } 

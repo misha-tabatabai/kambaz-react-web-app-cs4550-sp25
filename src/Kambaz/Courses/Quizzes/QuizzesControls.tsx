@@ -1,5 +1,5 @@
 import { Button } from "react-bootstrap";
-import { FaPlus, FaEllipsisV } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 
 
@@ -18,9 +18,6 @@ export default function QuizzesControls() {
                     onClick={handleAddQuiz}>
                     <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
                     Quiz
-                </Button>
-                <Button variant="secondary" size="lg" className="me-1" id="wd-quiz-options">
-                    <FaEllipsisV className="position-relative" style={{ bottom: "1px" }} />
                 </Button>
             </div>
         </div>

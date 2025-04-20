@@ -9,6 +9,7 @@ interface Question {
   _id: string;
   quizId: string;
   title: string;
+  description: string;
   type: string;
   points: number;
   choices?: string[];
@@ -43,6 +44,7 @@ export default function QuestionsEditor() {
       _id: Date.now().toString(),
       quizId: qid || "",
       title: "",
+      description: "",
       type: "multiple-choice",
       points: 0
     };
@@ -91,6 +93,7 @@ export default function QuestionsEditor() {
           _id: editingQuestion._id,
           quizId: editingQuestion.quizId,
           title: editingQuestion.title,
+          description: editingQuestion.description,
           type: editingQuestion.type,
           points: editingQuestion.points
         };
@@ -175,6 +178,21 @@ export default function QuestionsEditor() {
     }
   };
 
+  const addChoice = () => {
+    if (editingQuestion) {
+      const newChoices = [...(editingQuestion.choices || []), ""];
+      setEditingQuestion({ ...editingQuestion, choices: newChoices });
+    }
+  };
+
+  const removeChoice = (index: number) => {
+    if (editingQuestion) {
+      const newChoices = [...(editingQuestion.choices || [])];
+      newChoices.splice(index, 1);
+      setEditingQuestion({ ...editingQuestion, choices: newChoices });
+    }
+  };
+
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
 
   return (
@@ -197,10 +215,19 @@ export default function QuestionsEditor() {
           {question.isEditing ? (
             <div>
               <FormGroup className="mb-3">
+                <label>Question Title</label>
+                <input
+                  type="text"
+                  value={editingQuestion?.title || ""}
+                  onChange={(e) => handleChange("title", e.target.value)}
+                  placeholder="Enter Question Title"
+                />
+              </FormGroup>
+              <FormGroup className="mb-3">
                 <label>Question Text</label>
                 <ReactQuill
-                  value={editingQuestion?.title || ""}
-                  onChange={(content) => handleChange("title", content)}
+                  value={editingQuestion?.description || ""}
+                  onChange={(content) => handleChange("description", content.toString())}
                   modules={{
                     toolbar: [
                       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -246,23 +273,36 @@ export default function QuestionsEditor() {
                 <div>
                   {editingQuestion.choices?.map((choice, index) => (
                     <FormGroup key={index} className="mb-2">
-                      <FormCheck
-                        type="radio"
-                        name="correctAnswer"
-                        checked={editingQuestion.correctAnswer === index.toString()}
-                        onChange={() => handleChange("correctAnswer", index.toString())}
-                      />
-                      <FormControl
-                        value={choice}
-                        onChange={(e) => {
-                          const newChoices = [...(editingQuestion.choices || [])];
-                          newChoices[index] = e.target.value;
-                          handleChange("choices", newChoices);
-                        }}
-                        placeholder={`Choice ${index + 1}`}
-                      />
+                      <div className="d-flex align-items-center">
+                        <FormCheck
+                          type="radio"
+                          name="correctAnswer"
+                          checked={editingQuestion.correctAnswer === index.toString()}
+                          onChange={() => handleChange("correctAnswer", index.toString())}
+                        />
+                        <FormControl
+                          value={choice}
+                          onChange={(e) => {
+                            const newChoices = [...(editingQuestion.choices || [])];
+                            newChoices[index] = e.target.value;
+                            handleChange("choices", newChoices);
+                          }}
+                          placeholder={`Choice ${index + 1}`}
+                          className="ms-2"
+                        />
+                        <Button
+                          variant="outline-danger"
+                          className="ms-2"
+                          onClick={() => removeChoice(index)}
+                        >
+                          X
+                        </Button>
+                      </div>
                     </FormGroup>
                   ))}
+                  <Button variant="outline-secondary" className="mb-2" onClick={addChoice}>
+                    + Add Choice
+                  </Button>
                 </div>
               )}
 
@@ -323,7 +363,10 @@ export default function QuestionsEditor() {
           ) : (
             <div>
               <div className="d-flex justify-content-between align-items-center">
-                <div dangerouslySetInnerHTML={{ __html: question.title }} />
+                <div>
+                  <h5>{question.title}</h5>
+                  <div dangerouslySetInnerHTML={{ __html: question.description }} />
+                </div>
                 <div>
                   <Button variant="outline-primary" className="me-2" onClick={() => handleEdit(question)}>
                     Edit
